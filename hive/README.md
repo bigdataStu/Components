@@ -1,6 +1,6 @@
 # Hive 实操演练
 
-本案例来自知乎 [Hive 与 Hadoop 大数据分析专栏](]https://zhuanlan.zhihu.com/c_1226144823318958080)，关于 hadoop 与 hive 等环境的搭建、数据准备等工作，请参考上述专栏，以下篇幅主要集中于实战演练案例。
+本案例来自知乎 [Hive 与 Hadoop 大数据分析专栏](https://zhuanlan.zhihu.com/c_1226144823318958080)，关于 hadoop 与 hive 等环境的搭建、数据准备等工作，请参考上述专栏，以下篇幅主要集中于实战演练案例。
 
 [Hive 官网](https://hive.apache.org/) 是最权威的教材。
 

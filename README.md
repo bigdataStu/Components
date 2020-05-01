@@ -6,3 +6,4 @@
 
 [zookeeper 案例](data/zookeeper.md)
 
+[hive 实战案例](hive/README.md)
