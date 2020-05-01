@@ -1742,4 +1742,3 @@ Time taken: 17.378 seconds, Fetched: 70 row(s)
 
 需求 41：退款时间间隔最长的用户。
 
-
