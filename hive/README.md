@@ -225,612 +225,6 @@ Hive 表 -> HDFS
 
 insert overwrite directory 'local path' 查询语句;
 
-## 实战数据准备
-
-数据获取方式访问知乎 [Hive 与 Hadoop 大数据分析专栏](]https://zhuanlan.zhihu.com/c_1226144823318958080) [第六章 Hive 基本查询分析](https://zhuanlan.zhihu.com/p/127209857) 
-
-使用的数据库
-
-```shell
-hive (kaikeba)> show tables;
-OK
-tab_name
-dim_month
-stu_mess
-stu_mess_part
-stu_messages
-test
-trade_2017
-trade_2018
-trade_2019
-user_goods_category
-user_info
-user_list_1
-user_list_2
-user_list_3
-user_refund
-user_trade
-user_trade_bak
-```
-
-dim_month 表
-```shell
-hive (kaikeba)> desc dim_month;
-OK
-col_name	data_type	comment
-month               	string  
-```
-
-```
-hive (kaikeba)> show create table dim_month;
-OK
-createtab_stmt
-CREATE TABLE `dim_month`(
-  `month` string)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'field.delim'='\t', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/dim_month'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1577958211')
-```
-
-stu_mess 表
-
-```
-hive (kaikeba)> desc stu_mess;
-OK
-col_name	data_type	comment
-stu_id              	int                 	                    
-sex                 	string              	                    
-age                 	int                 	                    
-address             	string              	                    
-tel_num             	string              	                    
-ts                  	date                	                    
-y                   	int                 	                    
-m                   	int  
-```
-
-```
-hive (kaikeba)> show create table stu_mess;
-OK
-createtab_stmt
-CREATE TABLE `stu_mess`(
-  `stu_id` int, 
-  `sex` string, 
-  `age` int, 
-  `address` string, 
-  `tel_num` string, 
-  `ts` date, 
-  `y` int, 
-  `m` int)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'field.delim'='\t', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/stu_mess'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1578916483')
-```
-
-stu_mess_part 表
-
-```
-hive (kaikeba)> desc stu_mess_part;
-OK
-col_name	data_type	comment
-stu_id              	int                 	                    
-sex                 	string              	                    
-age                 	int                 	                    
-address             	string              	                    
-tel_num             	string              	                    
-ts                  	date                	                    
-y                   	int                 	                    
-m                   	int                 	                    
-	 	 
-# Partition Information	 	 
-# col_name            	data_type           	comment             
-y                   	int                 	                    
-m                   	int                 	                    
-Time taken: 0.336 seconds, Fetched: 13 row(s)
-```
-
-```
-hive (kaikeba)> show create table stu_mess_part;
-OK
-createtab_stmt
-CREATE TABLE `stu_mess_part`(
-  `stu_id` int, 
-  `sex` string, 
-  `age` int, 
-  `address` string, 
-  `tel_num` string, 
-  `ts` date)
-PARTITIONED BY ( 
-  `y` int, 
-  `m` int)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'field.delim'='\t', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/stu_mess_part'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1578916508')
-Time taken: 0.028 seconds, Fetched: 24 row(s)
-```
-
-stu_messages 表
-
-```
-hive (kaikeba)> desc stu_messages;
-OK
-col_name	data_type	comment
-stu_id              	int                 	                    
-sex                 	string              	                    
-age                 	int                 	                    
-address             	string              	                    
-tel_num             	string              	                    
-ts                  	date                	                    
-Time taken: 0.024 seconds, Fetched: 6 row(s)
-```
-
-```
-hive (kaikeba)> show create table stu_messages;
-OK
-createtab_stmt
-CREATE TABLE `stu_messages`(
-  `stu_id` int, 
-  `sex` string, 
-  `age` int, 
-  `address` string, 
-  `tel_num` string, 
-  `ts` date)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'field.delim'='\t', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/stu_messages'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1578916423')
-Time taken: 0.022 seconds, Fetched: 21 row(s)
-```
-
-trade_2017 表
-
-```
-hive (kaikeba)> desc trade_2017;
-OK
-col_name	data_type	comment
-user_name           	string              	                    
-amount              	double              	                    
-trade_time          	string              	                    
-Time taken: 0.025 seconds, Fetched: 3 row(s)
-```
-
-```
-hive (kaikeba)> show create table  trade_2017;
-OK
-createtab_stmt
-CREATE TABLE `trade_2017`(
-  `user_name` string, 
-  `amount` double, 
-  `trade_time` string)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'field.delim'='\t', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/trade_2017'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1577957939')
-Time taken: 0.02 seconds, Fetched: 18 row(s)
-```
-
-trade_2018 表
-
-```
-hive (kaikeba)> desc trade_2018;
-OK
-col_name	data_type	comment
-user_name           	string              	                    
-amount              	double              	                    
-trade_time          	string              	                    
-Time taken: 0.023 seconds, Fetched: 3 row(s)
-```
-
-```
-hive (kaikeba)> show create table  trade_2018;
-OK
-createtab_stmt
-CREATE TABLE `trade_2018`(
-  `user_name` string, 
-  `amount` double, 
-  `trade_time` string)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'field.delim'='\t', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/trade_2018'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1577957956')
-Time taken: 0.024 seconds, Fetched: 18 row(s)
-```
-
-trade_2019 表
-
-```
-hive (kaikeba)> desc trade_2019;
-OK
-col_name	data_type	comment
-user_name           	string              	                    
-amount              	double              	                    
-trade_time          	string              	                    
-Time taken: 0.02 seconds, Fetched: 3 row(s)
-```
-
-```
-hive (kaikeba)> show create table  trade_2019;
-OK
-createtab_stmt
-CREATE TABLE `trade_2019`(
-  `user_name` string, 
-  `amount` double, 
-  `trade_time` string)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'field.delim'='\t', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/trade_2019'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1577957974')
-Time taken: 0.02 seconds, Fetched: 18 row(s)
-```
-
-user_goods_category 表
-
-```
-hive (kaikeba)> desc user_goods_category;
-OK
-col_name	data_type	comment
-user_name           	string              	                    
-category_detail     	string              	                    
-Time taken: 0.025 seconds, Fetched: 2 row(s)
-```
-
-```
-hive (kaikeba)> show create table user_goods_category;
-OK
-createtab_stmt
-CREATE TABLE `user_goods_category`(
-  `user_name` string, 
-  `category_detail` string)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'field.delim'='\t', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_goods_category'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1577958194')
-Time taken: 0.02 seconds, Fetched: 17 row(s)
-```
-
-user_info 表
-
-```
-hive (kaikeba)> desc user_info;
-OK
-col_name	data_type	comment
-user_id             	string              	                    
-user_name           	string              	                    
-sex                 	string              	                    
-age                 	int                 	                    
-city                	string              	                    
-firstactivetime     	string              	                    
-level               	int                 	                    
-extra1              	string              	                    
-extra2              	map<string,string>  	                    
-Time taken: 0.019 seconds, Fetched: 9 row(s)
-```
-
-```
-hive (kaikeba)> show create table user_info;
-OK
-createtab_stmt
-CREATE TABLE `user_info`(
-  `user_id` string, 
-  `user_name` string, 
-  `sex` string, 
-  `age` int, 
-  `city` string, 
-  `firstactivetime` string, 
-  `level` int, 
-  `extra1` string, 
-  `extra2` map<string,string>)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'collection.delim'=',', 
-  'field.delim'='\t', 
-  'line.delim'='\n', 
-  'mapkey.delim'=':', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_info'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1577957782')
-Time taken: 0.02 seconds, Fetched: 27 row(s)
-```
-
-user_list_1 表
-
-```
-hive (kaikeba)> desc user_list_1;
-OK
-col_name	data_type	comment
-user_id             	string              	                    
-user_name           	string              	                    
-Time taken: 0.022 seconds, Fetched: 2 row(s)
-```
-
-```
-hive (kaikeba)> show create table user_list_1;
-OK
-createtab_stmt
-CREATE TABLE `user_list_1`(
-  `user_id` string, 
-  `user_name` string)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'collection.delim'=',', 
-  'field.delim'='\t', 
-  'mapkey.delim'=':', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_list_1'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1577957998')
-Time taken: 0.018 seconds, Fetched: 19 row(s)
-```
-
-user_list_2 表
-
-```
-hive (kaikeba)> desc user_list_2;
-OK
-col_name	data_type	comment
-user_id             	string              	                    
-user_name           	string              	                    
-Time taken: 0.018 seconds, Fetched: 2 row(s)
-```
-
-```
-hive (kaikeba)> show create table user_list_2;
-OK
-createtab_stmt
-CREATE TABLE `user_list_2`(
-  `user_id` string, 
-  `user_name` string)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'collection.delim'=',', 
-  'field.delim'='\t', 
-  'mapkey.delim'=':', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_list_2'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1577958019')
-Time taken: 0.021 seconds, Fetched: 19 row(s)
-```
-
-user_list_3 表
-
-```
-hive (kaikeba)> desc user_list_3;
-OK
-col_name	data_type	comment
-user_id             	string              	                    
-user_name           	string              	                    
-Time taken: 0.021 seconds, Fetched: 2 row(s)
-```
-
-```
-hive (kaikeba)> show create table user_list_3;
-OK
-createtab_stmt
-CREATE TABLE `user_list_3`(
-  `user_id` string, 
-  `user_name` string)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'collection.delim'=',', 
-  'field.delim'='\t', 
-  'mapkey.delim'=':', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_list_3'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1577958037')
-Time taken: 0.017 seconds, Fetched: 19 row(s)
-```
-
-user_refund 表
-
-```
-hive (kaikeba)> desc user_refund;
-OK
-col_name	data_type	comment
-user_name           	string              	                    
-refund_piece        	int                 	                    
-refund_amount       	double              	                    
-refund_time         	string              	                    
-dt                  	string              	                    
-	 	 
-# Partition Information	 	 
-# col_name            	data_type           	comment             
-dt                  	string              	                    
-Time taken: 0.138 seconds, Fetched: 9 row(s)
-```
-
-```
-hive (kaikeba)> show create table user_refund;
-OK
-createtab_stmt
-CREATE TABLE `user_refund`(
-  `user_name` string, 
-  `refund_piece` int, 
-  `refund_amount` double, 
-  `refund_time` string)
-PARTITIONED BY ( 
-  `dt` string)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'field.delim'='\t', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_refund'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1577958054')
-Time taken: 0.02 seconds, Fetched: 21 row(s)
-```
-
-user_trade 表
-
-```
-hive (kaikeba)> desc user_trade;
-OK
-col_name	data_type	comment
-user_name           	string              	                    
-piece               	int                 	                    
-price               	double              	                    
-pay_amount          	double              	                    
-goods_category      	string              	                    
-pay_time            	bigint              	                    
-dt                  	string              	                    
-	 	 
-# Partition Information	 	 
-# col_name            	data_type           	comment             
-dt                  	string              	                    
-Time taken: 0.115 seconds, Fetched: 11 row(s)
-```
-
-```
-hive (kaikeba)> show create table user_trade;
-OK
-createtab_stmt
-CREATE TABLE `user_trade`(
-  `user_name` string, 
-  `piece` int, 
-  `price` double, 
-  `pay_amount` double, 
-  `goods_category` string, 
-  `pay_time` bigint)
-PARTITIONED BY ( 
-  `dt` string)
-ROW FORMAT SERDE 
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
-WITH SERDEPROPERTIES ( 
-  'field.delim'='\t', 
-  'serialization.format'='\t') 
-STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
-OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION
-  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_trade'
-TBLPROPERTIES (
-  'bucketing_version'='2', 
-  'transient_lastDdlTime'='1577957792')
-Time taken: 0.017 seconds, Fetched: 23 row(s)
-```
-
-其实通过上面的 show create table table_name 可以发现有趣的东西。
-
 ## 实战演练
 
 执行以下语句，select 查看数据时, 会打印对应的表头:
@@ -1674,8 +1068,6 @@ Time taken: 17.378 seconds, Fetched: 70 row(s)
 
 需求 19：取出在 user_list_1 表 但是不在 user_list_2 的用户。
 
-
-
 需求 20：无退款服务类用户的定位分析，用以发送服务判断类用户调研。
 
 在 2019 年购买，但是没有退款的用户。
@@ -1691,7 +1083,6 @@ Time taken: 17.378 seconds, Fetched: 70 row(s)
 需求 24：对某年度的客户交易价值进行分析。
 
 2019 年每个用户的支付和退款金额汇总[注重买了又退的] [这个是所有的客户，下一个是支付的客户]。
-
 
 需求 25：对某年度的重点客户交易价值进行分析。
 
@@ -1741,4 +1132,612 @@ Time taken: 17.378 seconds, Fetched: 70 row(s)
 需求 40：计算出每 4 个月的最大退款金额。
 
 需求 41：退款时间间隔最长的用户。
+
+## 实战数据准备
+
+数据获取方式访问知乎 [Hive 与 Hadoop 大数据分析专栏](]https://zhuanlan.zhihu.com/c_1226144823318958080) [第六章 Hive 基本查询分析](https://zhuanlan.zhihu.com/p/127209857) 
+
+使用的数据库
+
+```shell
+hive (kaikeba)> show tables;
+OK
+tab_name
+dim_month
+stu_mess
+stu_mess_part
+stu_messages
+test
+trade_2017
+trade_2018
+trade_2019
+user_goods_category
+user_info
+user_list_1
+user_list_2
+user_list_3
+user_refund
+user_trade
+user_trade_bak
+```
+
+dim_month 表
+```shell
+hive (kaikeba)> desc dim_month;
+OK
+col_name	data_type	comment
+month               	string  
+```
+
+```
+hive (kaikeba)> show create table dim_month;
+OK
+createtab_stmt
+CREATE TABLE `dim_month`(
+  `month` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'field.delim'='\t', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/dim_month'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1577958211')
+```
+
+stu_mess 表
+
+```
+hive (kaikeba)> desc stu_mess;
+OK
+col_name	data_type	comment
+stu_id              	int                 	                    
+sex                 	string              	                    
+age                 	int                 	                    
+address             	string              	                    
+tel_num             	string              	                    
+ts                  	date                	                    
+y                   	int                 	                    
+m                   	int  
+```
+
+```
+hive (kaikeba)> show create table stu_mess;
+OK
+createtab_stmt
+CREATE TABLE `stu_mess`(
+  `stu_id` int, 
+  `sex` string, 
+  `age` int, 
+  `address` string, 
+  `tel_num` string, 
+  `ts` date, 
+  `y` int, 
+  `m` int)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'field.delim'='\t', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/stu_mess'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1578916483')
+```
+
+stu_mess_part 表
+
+```
+hive (kaikeba)> desc stu_mess_part;
+OK
+col_name	data_type	comment
+stu_id              	int                 	                    
+sex                 	string              	                    
+age                 	int                 	                    
+address             	string              	                    
+tel_num             	string              	                    
+ts                  	date                	                    
+y                   	int                 	                    
+m                   	int                 	                    
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+y                   	int                 	                    
+m                   	int                 	                    
+Time taken: 0.336 seconds, Fetched: 13 row(s)
+```
+
+```
+hive (kaikeba)> show create table stu_mess_part;
+OK
+createtab_stmt
+CREATE TABLE `stu_mess_part`(
+  `stu_id` int, 
+  `sex` string, 
+  `age` int, 
+  `address` string, 
+  `tel_num` string, 
+  `ts` date)
+PARTITIONED BY ( 
+  `y` int, 
+  `m` int)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'field.delim'='\t', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/stu_mess_part'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1578916508')
+Time taken: 0.028 seconds, Fetched: 24 row(s)
+```
+
+stu_messages 表
+
+```
+hive (kaikeba)> desc stu_messages;
+OK
+col_name	data_type	comment
+stu_id              	int                 	                    
+sex                 	string              	                    
+age                 	int                 	                    
+address             	string              	                    
+tel_num             	string              	                    
+ts                  	date                	                    
+Time taken: 0.024 seconds, Fetched: 6 row(s)
+```
+
+```
+hive (kaikeba)> show create table stu_messages;
+OK
+createtab_stmt
+CREATE TABLE `stu_messages`(
+  `stu_id` int, 
+  `sex` string, 
+  `age` int, 
+  `address` string, 
+  `tel_num` string, 
+  `ts` date)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'field.delim'='\t', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/stu_messages'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1578916423')
+Time taken: 0.022 seconds, Fetched: 21 row(s)
+```
+
+trade_2017 表
+
+```
+hive (kaikeba)> desc trade_2017;
+OK
+col_name	data_type	comment
+user_name           	string              	                    
+amount              	double              	                    
+trade_time          	string              	                    
+Time taken: 0.025 seconds, Fetched: 3 row(s)
+```
+
+```
+hive (kaikeba)> show create table  trade_2017;
+OK
+createtab_stmt
+CREATE TABLE `trade_2017`(
+  `user_name` string, 
+  `amount` double, 
+  `trade_time` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'field.delim'='\t', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/trade_2017'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1577957939')
+Time taken: 0.02 seconds, Fetched: 18 row(s)
+```
+
+trade_2018 表
+
+```
+hive (kaikeba)> desc trade_2018;
+OK
+col_name	data_type	comment
+user_name           	string              	                    
+amount              	double              	                    
+trade_time          	string              	                    
+Time taken: 0.023 seconds, Fetched: 3 row(s)
+```
+
+```
+hive (kaikeba)> show create table  trade_2018;
+OK
+createtab_stmt
+CREATE TABLE `trade_2018`(
+  `user_name` string, 
+  `amount` double, 
+  `trade_time` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'field.delim'='\t', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/trade_2018'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1577957956')
+Time taken: 0.024 seconds, Fetched: 18 row(s)
+```
+
+trade_2019 表
+
+```
+hive (kaikeba)> desc trade_2019;
+OK
+col_name	data_type	comment
+user_name           	string              	                    
+amount              	double              	                    
+trade_time          	string              	                    
+Time taken: 0.02 seconds, Fetched: 3 row(s)
+```
+
+```
+hive (kaikeba)> show create table  trade_2019;
+OK
+createtab_stmt
+CREATE TABLE `trade_2019`(
+  `user_name` string, 
+  `amount` double, 
+  `trade_time` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'field.delim'='\t', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/trade_2019'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1577957974')
+Time taken: 0.02 seconds, Fetched: 18 row(s)
+```
+
+user_goods_category 表
+
+```
+hive (kaikeba)> desc user_goods_category;
+OK
+col_name	data_type	comment
+user_name           	string              	                    
+category_detail     	string              	                    
+Time taken: 0.025 seconds, Fetched: 2 row(s)
+```
+
+```
+hive (kaikeba)> show create table user_goods_category;
+OK
+createtab_stmt
+CREATE TABLE `user_goods_category`(
+  `user_name` string, 
+  `category_detail` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'field.delim'='\t', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_goods_category'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1577958194')
+Time taken: 0.02 seconds, Fetched: 17 row(s)
+```
+
+user_info 表
+
+```
+hive (kaikeba)> desc user_info;
+OK
+col_name	data_type	comment
+user_id             	string              	                    
+user_name           	string              	                    
+sex                 	string              	                    
+age                 	int                 	                    
+city                	string              	                    
+firstactivetime     	string              	                    
+level               	int                 	                    
+extra1              	string              	                    
+extra2              	map<string,string>  	                    
+Time taken: 0.019 seconds, Fetched: 9 row(s)
+```
+
+```
+hive (kaikeba)> show create table user_info;
+OK
+createtab_stmt
+CREATE TABLE `user_info`(
+  `user_id` string, 
+  `user_name` string, 
+  `sex` string, 
+  `age` int, 
+  `city` string, 
+  `firstactivetime` string, 
+  `level` int, 
+  `extra1` string, 
+  `extra2` map<string,string>)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'collection.delim'=',', 
+  'field.delim'='\t', 
+  'line.delim'='\n', 
+  'mapkey.delim'=':', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_info'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1577957782')
+Time taken: 0.02 seconds, Fetched: 27 row(s)
+```
+
+user_list_1 表
+
+```
+hive (kaikeba)> desc user_list_1;
+OK
+col_name	data_type	comment
+user_id             	string              	                    
+user_name           	string              	                    
+Time taken: 0.022 seconds, Fetched: 2 row(s)
+```
+
+```
+hive (kaikeba)> show create table user_list_1;
+OK
+createtab_stmt
+CREATE TABLE `user_list_1`(
+  `user_id` string, 
+  `user_name` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'collection.delim'=',', 
+  'field.delim'='\t', 
+  'mapkey.delim'=':', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_list_1'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1577957998')
+Time taken: 0.018 seconds, Fetched: 19 row(s)
+```
+
+user_list_2 表
+
+```
+hive (kaikeba)> desc user_list_2;
+OK
+col_name	data_type	comment
+user_id             	string              	                    
+user_name           	string              	                    
+Time taken: 0.018 seconds, Fetched: 2 row(s)
+```
+
+```
+hive (kaikeba)> show create table user_list_2;
+OK
+createtab_stmt
+CREATE TABLE `user_list_2`(
+  `user_id` string, 
+  `user_name` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'collection.delim'=',', 
+  'field.delim'='\t', 
+  'mapkey.delim'=':', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_list_2'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1577958019')
+Time taken: 0.021 seconds, Fetched: 19 row(s)
+```
+
+user_list_3 表
+
+```
+hive (kaikeba)> desc user_list_3;
+OK
+col_name	data_type	comment
+user_id             	string              	                    
+user_name           	string              	                    
+Time taken: 0.021 seconds, Fetched: 2 row(s)
+```
+
+```
+hive (kaikeba)> show create table user_list_3;
+OK
+createtab_stmt
+CREATE TABLE `user_list_3`(
+  `user_id` string, 
+  `user_name` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'collection.delim'=',', 
+  'field.delim'='\t', 
+  'mapkey.delim'=':', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_list_3'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1577958037')
+Time taken: 0.017 seconds, Fetched: 19 row(s)
+```
+
+user_refund 表
+
+```
+hive (kaikeba)> desc user_refund;
+OK
+col_name	data_type	comment
+user_name           	string              	                    
+refund_piece        	int                 	                    
+refund_amount       	double              	                    
+refund_time         	string              	                    
+dt                  	string              	                    
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+dt                  	string              	                    
+Time taken: 0.138 seconds, Fetched: 9 row(s)
+```
+
+```
+hive (kaikeba)> show create table user_refund;
+OK
+createtab_stmt
+CREATE TABLE `user_refund`(
+  `user_name` string, 
+  `refund_piece` int, 
+  `refund_amount` double, 
+  `refund_time` string)
+PARTITIONED BY ( 
+  `dt` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'field.delim'='\t', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_refund'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1577958054')
+Time taken: 0.02 seconds, Fetched: 21 row(s)
+```
+
+user_trade 表
+
+```
+hive (kaikeba)> desc user_trade;
+OK
+col_name	data_type	comment
+user_name           	string              	                    
+piece               	int                 	                    
+price               	double              	                    
+pay_amount          	double              	                    
+goods_category      	string              	                    
+pay_time            	bigint              	                    
+dt                  	string              	                    
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+dt                  	string              	                    
+Time taken: 0.115 seconds, Fetched: 11 row(s)
+```
+
+```
+hive (kaikeba)> show create table user_trade;
+OK
+createtab_stmt
+CREATE TABLE `user_trade`(
+  `user_name` string, 
+  `piece` int, 
+  `price` double, 
+  `pay_amount` double, 
+  `goods_category` string, 
+  `pay_time` bigint)
+PARTITIONED BY ( 
+  `dt` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'field.delim'='\t', 
+  'serialization.format'='\t') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://node100:9000/user/hive/warehouse/kaikeba.db/user_trade'
+TBLPROPERTIES (
+  'bucketing_version'='2', 
+  'transient_lastDdlTime'='1577957792')
+Time taken: 0.017 seconds, Fetched: 23 row(s)
+```
+
+其实通过上面的 show create table table_name 可以发现有趣的东西。
+
+
 
