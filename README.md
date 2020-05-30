@@ -7,3 +7,6 @@
 [zookeeper 案例](data/zookeeper.md)
 
 [hive 实战案例](hive/README.md)
+
+[spark 电影实战案例](spark/readme.md)
+
